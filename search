@@ -1,0 +1,453 @@
+<?php
+include("templete/db_connect.php");
+
+//include("../templete/db_connect.php");
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    
+
+    // Build the SQL query
+    $sql = "SELECT DISTINCT(r.restaurant_name), r.restaurant_id, r.email, r.r_image, r.cityCorporation, r.policeStaion, r.contactNumber1, r.contactNumber2, r.detailsAddress, r.map
+        FROM restaurant as r 
+        JOIN restaurant_features rf ON r.restaurant_id = rf.restaurant_id
+        JOIN features f ON rf.feature_id = f.id
+        WHERE r.policeStaion = 'vatara'";
+
+
+ // Execute the query
+ $result = $conn->query($sql);
+
+ // Check for errors
+ if (!$result) {
+   $error_message = "Error executing query: " . $conn->error;
+ }
+}
+$conn->close();
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Reservation Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/reservation.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha384-GLhlTQ8i9GZlD9Pe6nLEHxx7z7jpjq6LQxVer/6Za4MQu/6szfcXpDg2EUpX+NMl" crossorigin="anonymous">
+
+
+
+</head>
+
+<body>
+    <?php include('header.php') ?>
+<div class="welcome">
+    <p>Welcome to Bite<span>Map</span> <br>Reservation Portal</p>
+</div>
+    <?php
+
+
+// Retrieve session values
+$restaurant_name = isset($_GET['restaurant_name']) ? $_GET['restaurant_name'] : '';
+$policeStation = isset($_GET['policeStation']) ? $_GET['policeStation'] : '';
+$contact_number = isset($_GET['contact_number']) ? $_GET['contact_number'] : '';
+$details_address = isset($_GET['details_address']) ? $_GET['details_address'] : '';
+$map = isset($_GET['map']) ? $_GET['map'] : '';
+$image = isset($_GET['r_image']) ? $_GET['r_image']:'';
+// Output the retrieved values in the HTML content
+//echo $policeStation;
+
+   // $map = $_GET['map'];
+    
+    //$map = $_SESSION['map'] ?? '';
+   // echo $map;
+    
+    //echo $map;
+    // Output the retrieved values in the HTML content
+
+
+    //echo $policeStation;
+    ?>
+    <div class="two-columns">
+    <div class="inner">
+        <h2>
+            <?php echo $restaurant_name; ?>
+        </h2>
+        <p>
+            <i class="fas fa-map-marker-alt" style="font-size: 24px;"></i> <!-- Font Awesome location icon -->
+            Area:
+            <?php echo $policeStation; ?>
+        </p>
+        <p>
+            <i class="fas fa-phone" style="font-size: 24px;"></i> <!-- Font Awesome phone icon -->
+            Contact Number:
+            <?php echo $contact_number; ?>
+        </p>
+        <p>
+            <i class="fas fa-map-marked" style="font-size: 24px;"></i> <!-- Font Awesome location icon -->
+            Details Address:
+            <?php echo $details_address; ?>
+        </p>
+        
+        <p>
+        <?php echo '<iframe width="400" height="300" src="' . $map . '" style="position: relative; left: 50px; top: 20ox;" ... ></iframe>'; ?>
+    </p>
+    </div>
+        <div class="inner">
+            <h1>Reserve Your Table Now!</h1>
+            <h3>Reservation</h3>
+            <form>
+                <div class="form-row">
+                    <select name="days">
+                        <option value="day-select">Select Day</option>
+                        <option value="sunday">Sunday</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                    </select>
+
+                    <select name="hours">
+                        <option value="hour-select">Select Hour</option>
+                        <option value="10">10: 00</option>
+                        <option value="10">12: 00</option>
+                        <option value="10">14: 00</option>
+                        <option value="10">16: 00</option>
+                        <option value="10">18: 00</option>
+                        <option value="10">20: 00</option>
+                        <option value="10">22: 00</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" placeholder="Full Name">
+                    <input type="text" placeholder="Phone Number">
+                </div>
+
+                <div class="form-row">
+                    <input type="number" placeholder="How Many Persons?" min="1">
+                    <input type="text" placeholder="Phone Number">
+                </div>
+                <div>
+                    <button type="submit" class="button">BOOK NOW</button>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+    </div>
+    <!--new section -->
+    <div class="new-section">
+        <form method="post"action="reservation.php">
+        <button type="submit" name="nearby">Nearby You</button>
+    <h3>Restaurants For You </h3>
+    <div class="card-list">
+      <?php
+      // Assume $result is the result set containing books from the database
+
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $count = 0;
+        if ($result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+            //print_r($row);
+            // Store values in session
+            $_SESSION['restaurant_name'] = $row['restaurant_name'];
+            $_SESSION['policeStation'] = $row['policeStaion'];
+            $_SESSION['contact_number'] = $row['contactNumber1'];
+            $_SESSION['details_address'] = $row['detailsAddress'];
+           // $_SESSION['map'] = $row['map'];
+            
+            
+            //$_SESSION['map'] = $row['map'];
+            ?>
+            <a href="http://localhost/project/reservation.php?restaurant_name=<?php echo $row['restaurant_name']; ?>&policeStation=<?php echo $row['policeStaion']; ?>&contact_number=<?php echo $row['contactNumber1']; ?>&details_address=<?php echo $row['detailsAddress']; ?> ?&map=<?php echo urlencode($row['map']); ?>" class="card-item">
+              <img src="<?php echo $row['r_image']; ?>" alt="Card Image">
+              <span class="rName">
+                <?php echo $row['restaurant_name']; ?>
+              </span>
+              <span class="rArea">
+                <?php echo "Area : " . $row['policeStaion']; ?>
+              </span>
+              <span class="rNum">
+                <?php echo "Contact : " . $row['contactNumber1']; ?>
+              </span>
+              <span class="cDetails">
+                <?php echo $row['detailsAddress']; ?>
+              </span>
+              <span class="cStatus">
+                <?php echo "OPEN NOW"; ?>
+              </span>
+              <div class="arrow">
+                <i class="fa-solid fa-up-right-and-down-left-from-center card-icon"></i>
+              </div>
+            </a>
+            <?php
+            $count += 1;
+
+          }
+          echo "Total Restaurant nearBy  " .$policeStation ." is ". $count;
+        } else {
+          echo "<p>No Results Found</p>";
+        }
+      }
+      ?>
+
+    </div>
+</form>
+</div>
+    <!-- Footer -->
+    <div class="footer">
+        <?php include('footer.php') ?>
+    </div>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+<div>
+            <?php
+            if (isset($_GET['logout'])) {
+                // Unset the user_id from the session
+                //unset($_SESSION['user_id']);
+                //session_destroy();
+                echo "Are you sure to Delete your account?";
+                header('location: userProfile.php');
+                
+                exit;
+            }
+            ?>
+        </div>
+
+
+
+//reservation backup
+
+
+        <h1>Reserve Your Table Now!</h1>
+            <h3>Reservation</h3>
+            <form>
+                <div class="form-row">
+                    <select name="days">
+                        <option value="day-select">Select Day</option>
+                        <option value="sunday">Sunday</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                    </select>
+
+                    <select name="hours">
+                        <option value="hour-select">Select Hour</option>
+                        <option value="10">10: 00</option>
+                        <option value="10">12: 00</option>
+                        <option value="10">14: 00</option>
+                        <option value="10">16: 00</option>
+                        <option value="10">18: 00</option>
+                        <option value="10">20: 00</option>
+                        <option value="10">22: 00</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <input type="text" placeholder="Full Name">
+                    <input type="text" placeholder="Phone Number">
+                </div>
+
+                <div class="form-row">
+                    <input type="number" placeholder="How Many Persons?" min="1">
+                    <input type="text" placeholder="Phone Number">
+                </div>
+                <div>
+                    <button type="submit" class="button">BOOK NOW</button>
+
+                </div>
+            </form>
+
+
+            /////blog home backup
+            <?php while($row = mysqli_fetch_assoc($result)): ?>
+         <div class="blog-post">
+            <h3>
+               <?= $row['title']; ?>
+            </h3>
+            <p>By
+               <?= $row['first_name'].' '.$row['last_name']; ?>
+            </p>
+            <p>
+               <?= $row['timestamp']; ?>
+            </p>
+            <p>
+               <?= $row['content']; ?>
+            </p>
+            <?php if(!empty($row['image'])): ?>
+               <img src="<?= $row['image']; ?>" alt="Blog Image" class=>
+            <?php endif; ?>
+            <!-- Like and Dislike Buttons -->
+            <form action="userBlogHome.php" method="post">
+               <input type="hidden" name="blog_id" value="<?= $row['blog_id']; ?>">
+               <button type="submit" name="like">Like
+                  <?= $row['likes']; ?>
+               </button>
+               <button type="submit" name="dislike">Dislike
+                  <?= $row['dislikes']; ?>
+               </button>
+            </form>
+
+            
+              <!-- Update Blog post -->
+            <form method="post" action="update_blog_post.php">
+               <input type="hidden" name="blog_id" value="<?= $row['blog_id']; ?>">
+               <button type="submit" name="update_blog_post">Update Blog Post</button>
+            </form>
+            <div class="comments-section">
+               <h4>Comments:</h4>
+               <?php
+               // Display comments for each blog post
+               $blogId = $row['blog_id'];
+               $commentQuery = "SELECT user_blog_comments.*, user.first_name,user.last_name
+                   FROM user_blog_comments
+                   INNER JOIN user ON user_blog_comments.user_id = user.user_id
+                   WHERE blog_id = '$blogId'
+                   ORDER BY user_blog_comments.timestamp DESC";
+
+               $commentResult = mysqli_query($conn, $commentQuery) or die('Comment query failed: '.mysqli_error($conn));
+
+               while($comment = mysqli_fetch_assoc($commentResult)) {
+                  echo '<div class="comment">';
+                  echo '<p>By <strong>'.$comment['first_name'].' '.$comment['last_name'].'</strong></p>';
+                  echo '<p>'.$comment['comment_text'].'</p>';
+                  echo '<p>'.$comment['timestamp'].'</p>';
+                  echo '</div>';
+                  // Add update and delete options
+                  echo '<form method="post" action="update_blog_post.php">';
+                  echo '<input type="hidden" name="comment_id" value="'.$comment['comment_id'].'">';
+                  echo '<button type="submit" name="update_comment">Update</button>';
+                  echo '</form>';
+
+                  echo '<form method="post" action="">';  // Form action is empty as it submits to the same page
+                  echo '<input type="hidden" name="comment_id" value="'.$comment['comment_id'].'">';
+                  echo '<button type="submit" name="delete_comment">Delete</button>';
+                  echo '</form>';
+               }
+
+
+               ?>
+            </div>
+            <!-- Comment form -->
+            <form method="post" action="userBlogHome.php">
+               <!-- Other form fields -->
+               <input type="hidden" name="blog_id" value="<?php echo $row['blog_id']; ?>">
+               <textarea name="comment_text" required></textarea>
+               <input type="submit" value="Submit Comment">
+            </form>
+
+
+
+
+
+
+//reservation backup<div id="reservation-container" class="reservation-container">
+<div class="welcome">
+        <p>Welcome to-- <span> <?php echo $restaurant_name; ?></span> <br>Reservation Portal</p>
+    </div>
+<?php
+// Check for a status message
+$message = isset($_GET['message']) ? $_GET['message'] : '';
+
+// Display the message if available
+if (!empty($message)) {
+    echo '<div class="status-message">' . htmlspecialchars($message) . '</div>';
+}
+?>
+<?php
+if (!empty($_SESSION['user_id'])) {
+       
+    ?>
+    <h2>You are now making a Reservation for <?php echo $restaurant_name; ?><br></h2>
+    <p>Area: <?php echo $policeStation; ?></p>
+    
+    <form action="fuctions/process_reservation.php" method="post">
+        <input type="hidden" name="restaurant_id" value="<?php echo $restaurant_id; ?>">
+
+        <label for="reservation_time">Reservation Time (required):</label>
+        <input type="datetime-local" name="reservation_time" required>
+
+        <label for="num_of_guest">Number of Guest (required):</label>
+        <input type="number" name="guest" step="1" required>
+
+        <label for="initial_payment">Initial Payment (BDT):</label>
+        <input type="number" name="initial_payment" step="0.01" required>
+
+        <label for="instruction">Reservation Time (required):</label>
+        <input type="text" name="instruction" >
+       <button type="submit">Submit Reservation</button>
+    </form>
+    
+    <button id="toggle-reservation" class="toggle-reservation">Close Reservation Form</button>
+</div>
+
+<!-- Button to Toggle Reservation Form -->
+<button id="show-reservation" class="reservation-link">Make a Reservation</button>
+
+<script>
+    // Script to toggle visibility of reservation form
+    document.getElementById('show-reservation').addEventListener('click', function () {
+        document.getElementById('reservation-container').style.display = 'block';
+    });
+
+    document.getElementById('toggle-reservation').addEventListener('click', function () {
+        document.getElementById('reservation-container').style.display = 'none';
+    });
+</script>
+<?php }?>
+
+
+
+
+
+
+
+            //backup dashboard
+            
+            <?php
+                    $total_messages = 0;
+
+                    // Query to select messages for a specific restaurant
+                    $select_messages = mysqli_query($conn, "SELECT * FROM `messages` WHERE id = $restaurant_id") or die('query failed');
+
+                    // Check if there are rows returned
+                    if ($select_messages) {
+                        // Get the count of rows
+                        $total_messages = mysqli_num_rows($select_messages);
+                    }
+
+                    ?>
+
+
+
+
+                    <div class="box">
+                        <h3>New Messages</h3>
+                        <p>
+                            <?= $total_messages; ?>
+                        </p>
+                        <a href="update_profile.php" class="btn">see messages</a>
+                    </div>
